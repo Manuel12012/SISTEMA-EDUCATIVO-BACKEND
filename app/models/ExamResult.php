@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../core/Model.php';
-require_once __DIR__ . '/ExamAnswer.php';
+require_once __DIR__ . '/examAnswer.php';
 require_once __DIR__ . '/Exam.php';
 require_once __DIR__ . '/Question.php';
 class ExamResult extends Model
