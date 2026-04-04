@@ -1,19 +1,14 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
-// error_log("INICIO OK"); // debug sin romper headers
-
 define('BASE_PATH', dirname(__DIR__));
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config.php';
-
 // Cabeceras CORS
 header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Origin: http://localhost:5174");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
+// ⚠ Si la petición es OPTIONS, terminar aquí
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -35,5 +30,3 @@ require_once BASE_PATH . '/app/routes/api.php';
 
 // Ejecutar router
 Router::dispatch();
-
-ob_end_flush();
