@@ -1,11 +1,11 @@
 <?php
 class Database {
     public static function connect() {
-        $host = getenv("MYSQLHOST");
-        $db   = getenv("MYSQLDATABASE");
-        $user = getenv("MYSQLUSER");
-        $pass = getenv("MYSQLPASSWORD");
-        $port = getenv("MYSQLPORT") ?: 3306;
+        $host = "mysql.railway.internal";
+        $db   = "railway";
+        $user = "root";
+        $pass = "svgZMCxejMssJCljNDDucZjTOFKmnlGc";
+        $port = 3306;
 
         try {
             return new PDO(
