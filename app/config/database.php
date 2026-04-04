@@ -1,4 +1,7 @@
 <?php
+
+var_dump(getenv("MYSQL_HOST"), getenv("MYSQL_DATABASE"), getenv("MYSQL_USER"));
+exit();
 class Database {
     public static function connect() {
         $host = getenv("MYSQLHOST");        // Host desde Railway
