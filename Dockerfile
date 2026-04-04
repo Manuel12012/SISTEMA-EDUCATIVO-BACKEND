@@ -1,11 +1,17 @@
 FROM php:8.2-cli
 
-# Instalar extensiones necesarias
-RUN docker-php-ext-install pdo pdo_mysql
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    libzip-dev \
+    unzip \
+    && docker-php-ext-install pdo pdo_mysql
 
-# Copiar proyecto
+# Configurar directorio
 WORKDIR /app
 COPY . .
 
-# Servir app
+# Exponer puerto
+EXPOSE 8080
+
+# Ejecutar servidor
 CMD php -S 0.0.0.0:$PORT -t public
