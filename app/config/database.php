@@ -1,19 +1,11 @@
 <?php
-var_dump(
-    getenv("MYSQLHOST"),
-    getenv("MYSQLDATABASE"),
-    getenv("MYSQLUSER"),
-    getenv("MYSQLPASSWORD"),
-    getenv("MYSQLPORT")
-);
-exit();
 class Database {
     public static function connect() {
-        $host = getenv("MYSQLHOST");        // Host desde Railway
-        $db   = getenv("MYSQLDATABASE");    // Nombre DB
-        $user = getenv("MYSQLUSER");        // Usuario
-        $pass = getenv("MYSQLPASSWORD");    // Contraseña
-        $port = getenv("MYSQLPORT") ?: 3306;
+        $host = $_ENV['MYSQLHOST'] ?? 'default_host';
+        $db   = $_ENV['MYSQLDATABASE'] ?? 'default_db';
+        $user = $_ENV['MYSQLUSER'] ?? 'default_user';
+        $pass = $_ENV['MYSQLPASSWORD'] ?? 'default_pass';
+        $port = $_ENV['MYSQLPORT'] ?? 3306;
 
         try {
             return new PDO(
