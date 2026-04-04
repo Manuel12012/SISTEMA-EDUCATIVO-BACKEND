@@ -1,11 +1,11 @@
 <?php
 class Database {
     public static function connect() {
-        $host = $_ENV['MYSQLHOST'] ?? 'default_host';
-        $db   = $_ENV['MYSQLDATABASE'] ?? 'default_db';
-        $user = $_ENV['MYSQLUSER'] ?? 'default_user';
-        $pass = $_ENV['MYSQLPASSWORD'] ?? 'default_pass';
-        $port = $_ENV['MYSQLPORT'] ?? 3306;
+        $host = getenv("MYSQLHOST");
+        $db   = getenv("MYSQLDATABASE");
+        $user = getenv("MYSQLUSER");
+        $pass = getenv("MYSQLPASSWORD");
+        $port = getenv("MYSQLPORT") ?: 3306;
 
         try {
             return new PDO(
