@@ -2,10 +2,10 @@
 
 class Database{
     public static function connect(){
-        $host = "localhost";
-        $db = "plataforma-educativa";
-        $user = "root";
-        $pass = "";
+        $host = getenv("MYSQLHOST");
+        $db = getenv("MYSQLDATABASE");
+        $user = getenv("MYSQLUSER");
+        $pass = getenv("MYSQLPASSWORD");
 
         return new PDO(
             "mysql:host=$host;dbname=$db;charset=utf8",
