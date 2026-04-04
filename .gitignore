@@ -1,0 +1,34 @@
+# Dependencias
+node_modules/
+
+# Lock files (elige uno según tu gestor)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Variables de entorno
+.env
+.env.local
+.env.development
+.env.production
+
+# Builds / dist
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Cache
+.cache/
+.tmp/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDEs / editores
+.vscode/
+.idea/
