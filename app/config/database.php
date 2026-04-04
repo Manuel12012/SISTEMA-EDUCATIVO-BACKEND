@@ -1,6 +1,11 @@
 <?php
-
-var_dump(getenv("MYSQL_HOST"), getenv("MYSQL_DATABASE"), getenv("MYSQL_USER"));
+var_dump(
+    getenv("MYSQLHOST"),
+    getenv("MYSQLDATABASE"),
+    getenv("MYSQLUSER"),
+    getenv("MYSQLPASSWORD"),
+    getenv("MYSQLPORT")
+);
 exit();
 class Database {
     public static function connect() {
