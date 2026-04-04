@@ -1,1 +1,1 @@
-web: php -S 0.0.0.0:$PORT -t public
+web: php -d extension=pdo_mysql -S 0.0.0.0:$PORT -t public
