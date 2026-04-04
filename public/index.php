@@ -35,3 +35,5 @@ require_once BASE_PATH . '/app/routes/api.php';
 
 // Ejecutar router
 Router::dispatch();
+
+ob_end_flush();
