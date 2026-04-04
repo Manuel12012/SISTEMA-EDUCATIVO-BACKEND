@@ -2,7 +2,7 @@
 class Database {
     public static function connect() {
         $host = getenv("MYSQLHOST");        // Host desde Railway
-        $db   = getenv("MYSQL_DATABASE");    // Nombre DB
+        $db   = getenv("MYSQLDATABASE");    // Nombre DB
         $user = getenv("MYSQLUSER");        // Usuario
         $pass = getenv("MYSQLPASSWORD");    // Contraseña
         $port = getenv("MYSQLPORT") ?: 3306;
