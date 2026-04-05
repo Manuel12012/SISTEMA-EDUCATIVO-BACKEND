@@ -14,11 +14,11 @@ class ExamController
     public static function index()
     {
         $titulo = $_GET["titulo"] ?? null;
-        
+    
         if ($titulo) {
             $exams = Exam::getByTitle($titulo);
         } else {
-            $exams = Exam::allWithQuestionCount();
+            $exams = Exam::allWithQuestionCount(); // comportamiento por defecto
         }
     
         Response::json($exams);

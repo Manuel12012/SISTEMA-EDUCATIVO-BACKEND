@@ -44,7 +44,7 @@ Router::post('/course/upload', [CourseController::class, 'uploadImage']);
 Router::get('courses/{courseId}/students',[EnrollmentController::class, "getStudentsByCourse"]);
 
 // EXAMS
-Router::get('exams', [ExamController::class, 'allWithQuestionCount']);
+Router::get('exams', [ExamController::class, 'index']);
 Router::get('exams/{id}', [ExamController::class, 'show']);
 Router::post('exams', [ExamController::class, 'store']);
 Router::put('exams/{id}', [ExamController::class, 'update']);
