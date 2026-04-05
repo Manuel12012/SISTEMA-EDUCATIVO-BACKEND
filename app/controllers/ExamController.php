@@ -25,7 +25,6 @@ class ExamController
             Response::json($exams);
             return;
         }
-        error_log(print_r($exams, true)); // Imprime $exams en los logs del servidor
         Response::json($exams);        }
 
     public static function getQuestionsByExam($examId)

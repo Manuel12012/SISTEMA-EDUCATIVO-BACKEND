@@ -85,7 +85,7 @@ SELECT
             "duracion_minutos" => $data["duracion_minutos"],
             "created_by" => $data["created_by"] // viene del controller
         ]);
-    
+
         return (int) $db->lastInsertId();
     }
 
@@ -202,18 +202,19 @@ GROUP BY
         $stmt->execute(["id" => $courseId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
     public static function getByTitle($titulo) {
-
         $db = Database::connect();
-    
-        $stmt = $db->prepare("SELECT * FROM exams WHERE LOWER(titulo) LIKE :titulo");
-    
+        
+        $titulo = strtolower($titulo); // convertir input a minúsculas
+        
+        $stmt = $db->prepare(
+            "SELECT * FROM exams WHERE LOWER(titulo) LIKE :titulo"
+        );
+        
         $stmt->bindValue(":titulo", "%" . $titulo . "%");
-
-    
+        
         $stmt->execute();
-    
+        
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
