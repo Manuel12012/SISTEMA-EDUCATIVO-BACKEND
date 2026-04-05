@@ -205,24 +205,13 @@ GROUP BY
     {
         $db = Database::connect();
     
-        $sql = "SELECT * FROM exams WHERE LOWER(titulo) LIKE :titulo";
-        $stmt = $db->prepare($sql);
+        $stmt = $db->prepare(
+            "SELECT * FROM exams WHERE titulo LIKE :titulo"
+        );
     
-        // 🔹 Forzar todo a minúsculas para que coincida con LIKE
-        $searchTerm = "%" . strtolower($titulo) . "%";
-        $stmt->bindValue(":titulo", $searchTerm);
-    
-        // 🔹 Debug: mostrar la query y el valor
-        error_log("DEBUG: SQL ejecutado -> " . $sql);
-        error_log("DEBUG: valor de búsqueda -> " . $searchTerm);
-    
+        $stmt->bindValue(":titulo", "%" . trim($titulo) . "%", PDO::PARAM_STR);
         $stmt->execute();
     
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-        // 🔹 Debug: mostrar cantidad de resultados
-        error_log("DEBUG: cantidad de resultados encontrados -> " . count($results));
-    
-        return $results;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

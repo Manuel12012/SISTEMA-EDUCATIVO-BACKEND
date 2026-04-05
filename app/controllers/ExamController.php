@@ -14,23 +14,13 @@ class ExamController
     public static function index()
     {
         $titulo = $_GET["titulo"] ?? null;
-    
-        // 🔹 Debug: mostrar lo que llega desde la request
-        error_log("DEBUG: titulo recibido -> " . var_export($titulo, true));
-    
+        
         if ($titulo) {
             $exams = Exam::getByTitle($titulo);
         } else {
-            $exams = Exam::all();
+            $exams = Exam::allWithQuestionCount();
         }
     
-        // 🔹 Debug: mostrar cantidad de resultados
-        error_log("DEBUG: cantidad de exams encontrados -> " . count($exams));
-    
-        if (empty($exams)) {
-            Response::json($exams);
-            return;
-        }
         Response::json($exams);
     }
 
