@@ -6,9 +6,9 @@ require_once __DIR__ . '/../config.php';
 
 // ORÍGENES PERMITIDOS
 $allowedOrigins = [
-    'http://localhost:5173',  // Origen de desarrollo
-    'https://sistema-educativo-backend-production.up.railway.app',  // Origen de producción
-    // Puedes agregar más orígenes aquí si es necesario.
+    'http://localhost:5173',  
+    'https://sistema-educativo-backend-production.up.railway.app',
+    'https://sensational-otter-2b0319.netlify.app', // tu frontend Netlify
 ];
 
 // Verificamos si el origen de la solicitud es uno de los permitidos
