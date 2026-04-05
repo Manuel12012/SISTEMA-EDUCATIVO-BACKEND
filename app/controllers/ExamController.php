@@ -15,11 +15,11 @@ class ExamController
     {
         $titulo = $_GET["titulo"] ?? null;
     
-        // 🔹 Depuración: ver qué llega
-        var_dump($titulo); exit;
+        var_dump($titulo); // imprimirá el valor
+        die();             // detiene la ejecución, así verás solo esto en los logs
     
         if ($titulo) {
-            $exams =  Exam::getByTitle($titulo);
+            $exams = Exam::getByTitle($titulo);
         } else {
             $exams = Exam::all();
         }
