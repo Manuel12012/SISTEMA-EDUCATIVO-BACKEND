@@ -25,7 +25,8 @@ class ExamController
             Response::json($exams);
             return;
         }
-        Response::json($exams);        }
+        Response::json($exams);
+    }
 
     public static function getQuestionsByExam($examId)
     {

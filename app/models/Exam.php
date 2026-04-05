@@ -202,19 +202,17 @@ GROUP BY
         $stmt->execute(["id" => $courseId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    public static function getByTitle($titulo) {
+    public static function getByTitle($titulo)
+    {
         $db = Database::connect();
-        
-        $titulo = strtolower($titulo); // convertir input a minúsculas
-        
+
         $stmt = $db->prepare(
-            "SELECT * FROM exams WHERE LOWER(titulo) LIKE :titulo"
+            "SELECT * FROM exams WHERE titulo LIKE :titulo"
         );
-        
+
         $stmt->bindValue(":titulo", "%" . $titulo . "%");
-        
         $stmt->execute();
-        
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
