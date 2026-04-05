@@ -1,43 +1,39 @@
 <?php
-define('BASE_PATH', dirname(__DIR__));  // Define la ruta base del proyecto
-require_once __DIR__ . '/../vendor/autoload.php';  // Carga los autoloaders de Composer
-require_once __DIR__ . '/../config.php';  // Configuración adicional (si la tienes)
+define('BASE_PATH', dirname(__DIR__));
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../config.php';
 
-// Permitir CORS (aquí definimos los orígenes permitidos)
+// Permitir CORS
 $allowedOrigins = [
-    'https://localhost:3000',  // Durante el desarrollo
-    'https://sistema-educativo-frontend.com',  // Cambia por tu dominio de producción
+    'https://localhost:3000', // Tu frontend local
+    'https://mi-frontend-produccion.com' // Cambia a tu dominio de producción
 ];
 
-// Verificar si el origen de la solicitud está en la lista permitida
+// Verificar si el origen de la solicitud es permitido
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowedOrigins)) {
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
 }
 
-// Cabeceras de CORS
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");  // Métodos permitidos
-header("Access-Control-Allow-Headers: Content-Type, Authorization");  // Cabeceras permitidas
-header("Access-Control-Allow-Credentials: true");  // Habilitar credenciales si usas JWT o cookies
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Credentials: true");
 
-// Si la solicitud es un preflight (OPTIONS), responder con 200 OK
+// Si es una solicitud OPTIONS (preflight), responder con 200 OK y finalizar aquí
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    exit();  // Finaliza aquí la ejecución si es un preflight
+    exit();
 }
 
-// Core
-require_once BASE_PATH . '/app/core/Router.php';  // Cargar el router
-require_once BASE_PATH . '/app/core/Response.php';  // Cargar el response
+// Si no es OPTIONS, proceder con la lógica normal
+require_once BASE_PATH . '/app/core/Router.php';
+require_once BASE_PATH . '/app/core/Response.php';
 
-// Cargar los controladores
+// Cargar controladores
 require_once BASE_PATH . '/app/controllers/CourseController.php';
-require_once BASE_PATH . '/app/controllers/ModuleController.php';
-require_once BASE_PATH . '/app/controllers/LessonController.php';
-require_once BASE_PATH . '/app/controllers/ExamController.php';
-require_once BASE_PATH . '/app/controllers/QuestionController.php';
+// (otros controladores)
 
-// Cargar las rutas del API
+// Cargar rutas
 require_once BASE_PATH . '/app/routes/api.php';
 
-// Ejecutar el router
-Router::dispatch();  // Aquí se ejecutan las rutas según el endpoint solicitado
+// Ejecutar router
+Router::dispatch();
