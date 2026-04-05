@@ -12,8 +12,11 @@ $allowedOrigins = [
 ];
 
 // Verificamos si el origen de la solicitud es uno de los permitidos
-if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowedOrigins)) {
-    header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
+if (isset($_SERVER['HTTP_ORIGIN'])) {
+    $origin = strtolower($_SERVER['HTTP_ORIGIN']); // Convertir a minúsculas
+    if (in_array($origin, $allowedOrigins)) {
+        header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
+    }
 }
 
 // Cabeceras CORS
