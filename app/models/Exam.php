@@ -205,14 +205,14 @@ GROUP BY
     public static function getByTitle($titulo)
     {
         $db = Database::connect();
-
+    
         $stmt = $db->prepare(
-            "SELECT * FROM exams WHERE titulo LIKE :titulo"
+            "SELECT * FROM exams WHERE LOWER(TRIM(titulo)) LIKE :titulo"
         );
-
-        $stmt->bindValue(":titulo", "%" . $titulo . "%");
+    
+        $stmt->bindValue(":titulo", "%" . strtolower(trim($titulo)) . "%");
         $stmt->execute();
-
+    
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

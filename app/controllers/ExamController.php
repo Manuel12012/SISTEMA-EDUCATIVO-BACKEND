@@ -14,17 +14,16 @@ class ExamController
     public static function index()
     {
         $titulo = $_GET["titulo"] ?? null;
-
+    
+        // 🔹 Depuración: ver qué llega
+        var_dump($titulo); exit;
+    
         if ($titulo) {
             $exams =  Exam::getByTitle($titulo);
         } else {
             $exams = Exam::all();
         }
-
-        if (empty($exams)) {
-            Response::json($exams);
-            return;
-        }
+    
         Response::json($exams);
     }
 
