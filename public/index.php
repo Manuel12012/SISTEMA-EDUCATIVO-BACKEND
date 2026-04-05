@@ -1,39 +1,56 @@
 <?php
-// CORS para todos los requests, incluso OPTIONS
+// ----------------- CORS -----------------
 $allowedOrigins = [
-    'http://localhost:5173',
-    'https://cosmic-sunshine-8bd634.netlify.app',
+    'http://localhost:5173', // desarrollo
+    'https://cosmic-sunshine-8bd634.netlify.app', // producción
 ];
 
-if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowedOrigins)) {
-    header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$origin = strtolower($origin);
+
+if (in_array($origin, array_map('strtolower', $allowedOrigins))) {
+    header("Access-Control-Allow-Origin: $origin");
     header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
     header("Access-Control-Allow-Headers: Content-Type, Authorization");
     header("Access-Control-Allow-Credentials: true");
+    header("Vary: Origin");
 }
 
-// Preflight request
+// ⚠ Preflight OPTIONS
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-// Todo lo demás (autoload, config, router)
+// ----------------- AUTOLOAD Y CONFIG -----------------
 define('BASE_PATH', dirname(__DIR__));
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config.php';
 
-// Core y controllers
+// ----------------- CORE -----------------
 require_once BASE_PATH . '/app/core/Router.php';
 require_once BASE_PATH . '/app/core/Response.php';
-require_once BASE_PATH . '/app/controllers/CourseController.php';
-require_once BASE_PATH . '/app/controllers/ModuleController.php';
-require_once BASE_PATH . '/app/controllers/LessonController.php';
-require_once BASE_PATH . '/app/controllers/ExamController.php';
-require_once BASE_PATH . '/app/controllers/QuestionController.php';
 
-// Rutas
+// ----------------- CONTROLLERS -----------------
+require_once BASE_PATH . '/app/controllers/BadgeController.php';
+require_once BASE_PATH . '/app/controllers/CourseController.php';
+require_once BASE_PATH . '/app/controllers/ExamController.php';
+require_once BASE_PATH . '/app/controllers/ExamOptionController.php';
+require_once BASE_PATH . '/app/controllers/ExamResultController.php';
+require_once BASE_PATH . '/app/controllers/LessonController.php';
+require_once BASE_PATH . '/app/controllers/ModuleController.php';
+require_once BASE_PATH . '/app/controllers/PointHistoryController.php';
+require_once BASE_PATH . '/app/controllers/QuestionController.php';
+require_once BASE_PATH . '/app/controllers/UserBadgeController.php';
+require_once BASE_PATH . '/app/controllers/UserController.php';
+require_once BASE_PATH . '/app/controllers/EnrollmentController.php';
+
+// ----------------- MIDDLEWARES -----------------
+require_once BASE_PATH . '/app/middleware/AuthMiddleware.php';
+require_once BASE_PATH . '/app/middleware/RoleMiddleware.php';
+
+// ----------------- RUTAS -----------------
 require_once BASE_PATH . '/app/routes/api.php';
 
-// Ejecutar router
+// ----------------- EJECUTAR ROUTER -----------------
 Router::dispatch();
