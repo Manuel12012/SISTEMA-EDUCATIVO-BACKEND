@@ -201,14 +201,37 @@ GROUP BY
         );
         $stmt->execute(["id" => $courseId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }public static function getByTitle($titulo)
+    }
+    public static function getByTitle($titulo)
     {
         $db = Database::connect();
     
-        $stmt = $db->prepare(
-            "SELECT * FROM exams WHERE titulo LIKE :titulo"
-        );
+        $sql = "
+            SELECT 
+                e.id,
+                e.course_id,
+                c.titulo AS course_titulo,
+                e.titulo,
+                e.duracion_minutos,
+                e.created_at,
+                e.created_by,
+                e.activo,
+                COUNT(q.id) AS questions_count
+            FROM exams e
+            LEFT JOIN courses c ON c.id = e.course_id
+            LEFT JOIN questions q ON q.exam_id = e.id
+            WHERE e.titulo LIKE :titulo
+            GROUP BY 
+                e.id,
+                c.titulo,
+                e.titulo,
+                e.duracion_minutos,
+                e.created_at,
+                e.created_by,
+                e.activo
+        ";
     
+        $stmt = $db->prepare($sql);
         $stmt->bindValue(":titulo", "%" . trim($titulo) . "%", PDO::PARAM_STR);
         $stmt->execute();
     
