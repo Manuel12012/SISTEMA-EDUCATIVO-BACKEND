@@ -15,7 +15,8 @@ class ExamController
     {
         $titulo = $_GET["titulo"] ?? null;
     
-        error_log("DEBUG: titulo recibido => " . $titulo);
+        // 🔹 Debug: mostrar lo que llega desde la request
+        error_log("DEBUG: titulo recibido -> " . var_export($titulo, true));
     
         if ($titulo) {
             $exams = Exam::getByTitle($titulo);
@@ -23,6 +24,13 @@ class ExamController
             $exams = Exam::all();
         }
     
+        // 🔹 Debug: mostrar cantidad de resultados
+        error_log("DEBUG: cantidad de exams encontrados -> " . count($exams));
+    
+        if (empty($exams)) {
+            Response::json($exams);
+            return;
+        }
         Response::json($exams);
     }
 

@@ -201,18 +201,28 @@ GROUP BY
         );
         $stmt->execute(["id" => $courseId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    public static function getByTitle($titulo)
+    }public static function getByTitle($titulo)
     {
         $db = Database::connect();
     
-        $stmt = $db->prepare(
-            "SELECT * FROM exams WHERE LOWER(TRIM(titulo)) LIKE :titulo"
-        );
+        $sql = "SELECT * FROM exams WHERE LOWER(titulo) LIKE :titulo";
+        $stmt = $db->prepare($sql);
     
-        $stmt->bindValue(":titulo", "%" . strtolower(trim($titulo)) . "%");
+        // 🔹 Forzar todo a minúsculas para que coincida con LIKE
+        $searchTerm = "%" . strtolower($titulo) . "%";
+        $stmt->bindValue(":titulo", $searchTerm);
+    
+        // 🔹 Debug: mostrar la query y el valor
+        error_log("DEBUG: SQL ejecutado -> " . $sql);
+        error_log("DEBUG: valor de búsqueda -> " . $searchTerm);
+    
         $stmt->execute();
     
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+        // 🔹 Debug: mostrar cantidad de resultados
+        error_log("DEBUG: cantidad de resultados encontrados -> " . count($results));
+    
+        return $results;
     }
 }
