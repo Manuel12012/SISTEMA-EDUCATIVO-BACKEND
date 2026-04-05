@@ -15,8 +15,7 @@ class ExamController
     {
         $titulo = $_GET["titulo"] ?? null;
     
-        var_dump($titulo); // imprimirá el valor
-        die();             // detiene la ejecución, así verás solo esto en los logs
+        error_log("DEBUG: titulo recibido => " . $titulo);
     
         if ($titulo) {
             $exams = Exam::getByTitle($titulo);
