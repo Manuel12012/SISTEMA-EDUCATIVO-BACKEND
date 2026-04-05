@@ -207,9 +207,7 @@ GROUP BY
 
         $db = Database::connect();
     
-        $stmt = $db->prepare(
-            "SELECT * FROM exams WHERE titulo LIKE :titulo "
-        );
+        $stmt = $db->prepare("SELECT * FROM exams WHERE LOWER(titulo) LIKE :titulo");
     
         $stmt->bindValue(":titulo", "%" . $titulo . "%");
 
