@@ -13,17 +13,20 @@ class ExamController
 
     public static function index()
     {
-        $exams = Exam::all();
+        $titulo = $_GET["titulo"] ?? null;
+
+        if ($titulo) {
+            $exams =  Exam::getByTitle($titulo);
+        } else {
+            $exams = Exam::all();
+        }
 
         if (empty($exams)) {
-            Response::json([
-                "error" => "No se encontro el examen"
-            ], 404);
+            Response::json($exams);
             return;
         }
         Response::json($exams);
     }
-
 
     public static function getQuestionsByExam($examId)
     {
@@ -99,7 +102,7 @@ class ExamController
     public static function store($data)
     {
         // 1Verificar JWT y obtener el payload
-        $decoded = AuthMiddleware::verify(); 
+        $decoded = AuthMiddleware::verify();
         $userId = $decoded->id ?? null;
 
         if (!$userId) {
