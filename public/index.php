@@ -1,39 +1,51 @@
 <?php
+
 define('BASE_PATH', dirname(__DIR__));
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config.php';
 
-// Permitir CORS
+// ORÍGENES PERMITIDOS
 $allowedOrigins = [
-    'https://localhost:3000', // Tu frontend local
-    'https://mi-frontend-produccion.com' // Cambia a tu dominio de producción
+    'http://localhost:5173',  // Origen de desarrollo
+    'https://sistema-educativo-backend-production.up.railway.app',  // Origen de producción
+    // Puedes agregar más orígenes aquí si es necesario.
 ];
 
-// Verificar si el origen de la solicitud es permitido
+// Verificamos si el origen de la solicitud es uno de los permitidos
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowedOrigins)) {
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
 }
 
+// Cabeceras CORS
+header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// Si usas cookies o tokens de sesión:
 header("Access-Control-Allow-Credentials: true");
 
-// Si es una solicitud OPTIONS (preflight), responder con 200 OK y finalizar aquí
+// ⚠ Responder a preflight (OPTIONS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Terminamos la ejecución aquí para las solicitudes OPTIONS
     http_response_code(200);
     exit();
 }
 
-// Si no es OPTIONS, proceder con la lógica normal
+// Core
 require_once BASE_PATH . '/app/core/Router.php';
 require_once BASE_PATH . '/app/core/Response.php';
 
-// Cargar controladores
+// Controllers
 require_once BASE_PATH . '/app/controllers/CourseController.php';
-// (otros controladores)
+require_once BASE_PATH . '/app/controllers/ModuleController.php';
+require_once BASE_PATH . '/app/controllers/LessonController.php';
+require_once BASE_PATH . '/app/controllers/ExamController.php';
+require_once BASE_PATH . '/app/controllers/QuestionController.php';
 
-// Cargar rutas
+// Routes
 require_once BASE_PATH . '/app/routes/api.php';
 
 // Ejecutar router
 Router::dispatch();
+
+?>
