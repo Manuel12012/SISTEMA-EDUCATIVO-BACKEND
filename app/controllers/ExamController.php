@@ -14,20 +14,19 @@ class ExamController
     public static function index()
     {
         $titulo = $_GET["titulo"] ?? null;
-    
+
         if ($titulo) {
             $exams =  Exam::getByTitle($titulo);
         } else {
             $exams = Exam::all();
         }
-    
-        // Depuración con var_dump
-        var_dump($exams);  // ← esto lo verás en Postman como texto "raw"
-        // También puedes usar print_r($exams)
-    
-        // Comentar Response::json mientras debugueas
-        // Response::json($exams);
-    }
+
+        if (empty($exams)) {
+            Response::json($exams);
+            return;
+        }
+        error_log(print_r($exams, true)); // Imprime $exams en los logs del servidor
+        Response::json($exams);        }
 
     public static function getQuestionsByExam($examId)
     {
