@@ -18,7 +18,7 @@ require_once __DIR__ . '/../controllers/UserBadgeController.php';
 require_once __DIR__ . '/../controllers/UserController.php';
 require_once __DIR__ . '/../controllers/EnrollmentController.php';
 
-require_once __DIR__ . '/../Middleware/AuthMiddleware.php';
+require_once __DIR__ . '/../middleware/AuthMiddleware.php';
 // BADGES
 Router::get('badges', [BadgeController::class, 'index']);
 Router::get('badges/{id}', [BadgeController::class, 'show']);
