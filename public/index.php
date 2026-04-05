@@ -13,23 +13,19 @@ $allowedOrigins = [
 
 // Verificamos si el origen de la solicitud es uno de los permitidos
 if (isset($_SERVER['HTTP_ORIGIN'])) {
-    $origin = strtolower($_SERVER['HTTP_ORIGIN']); // Convertir a minúsculas
+    $origin = strtolower($_SERVER['HTTP_ORIGIN']);
     if (in_array($origin, $allowedOrigins)) {
         header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
     }
 }
 
-// Cabeceras CORS
 header("Content-Type: application/json");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-
-// Si usas cookies o tokens de sesión:
 header("Access-Control-Allow-Credentials: true");
 
-// ⚠ Responder a preflight (OPTIONS)
+// Responder preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    // Terminamos la ejecución aquí para las solicitudes OPTIONS
     http_response_code(200);
     exit();
 }
