@@ -208,7 +208,7 @@ GROUP BY
         $db = Database::connect();
     
         $stmt = $db->prepare(
-           " SELECT * FROM exams WHERE titulo LIKE '%Ciencias Naturales%';"
+            "SELECT * FROM exams WHERE titulo LIKE :titulo "
         );
     
         $stmt->bindValue(":titulo", "%" . $titulo . "%");

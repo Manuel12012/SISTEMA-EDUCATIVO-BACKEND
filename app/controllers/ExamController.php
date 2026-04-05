@@ -14,7 +14,8 @@ class ExamController
     public static function index()
     {
         $titulo = $_GET["titulo"] ?? null;
-
+        var_dump($titulo); // <--- ver qué valor llega
+        exit();
         if ($titulo) {
             $exams =  Exam::getByTitle($titulo);
         } else {
