@@ -79,17 +79,13 @@ SELECT
             "INSERT INTO exams (course_id, titulo, duracion_minutos, created_by) VALUES
             (:course_id, :titulo, :duracion_minutos, :created_by)"
         );
-        $createdBy = $_SESSION['id'] ?? null;
-        if (!$createdBy) {
-            throw new Exception("No hay usuario logueado para asignar created_by");
-        }
         $stmt->execute([
             "course_id" => $data["course_id"],
             "titulo" => $data["titulo"],
             "duracion_minutos" => $data["duracion_minutos"],
-            "created_by" => $createdBy
+            "created_by" => $data["created_by"] // viene del controller
         ]);
-
+    
         return (int) $db->lastInsertId();
     }
 

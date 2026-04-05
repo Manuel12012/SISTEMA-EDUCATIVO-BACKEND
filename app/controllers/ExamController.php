@@ -6,6 +6,7 @@ require_once __DIR__ . '/../models/ExamOption.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../models/ExamResult.php';
 
+use App\Middleware\AuthMiddleware;
 
 class ExamController
 {
@@ -97,29 +98,43 @@ class ExamController
 
     public static function store($data)
     {
+        // 1Verificar JWT y obtener el payload
+        $decoded = AuthMiddleware::verify(); 
+        $userId = $decoded->id ?? null;
+
+        if (!$userId) {
+            Response::json(["error" => "Usuario no válido"], 401);
+            exit;
+        }
+
+        // Validar datos del examen
         if (
             empty($data["course_id"]) ||
             empty($data["titulo"]) ||
             empty($data["duracion_minutos"])
         ) {
-            Response::json([
-                "error" => "Datos incompletos"
-            ], 400);
+            Response::json(["error" => "Datos incompletos"], 400);
             exit;
         }
 
-        $exam = Exam::create($data);
+        // Agregar el ID del usuario al array
+        $data['created_by'] = $userId;
 
-        if (!$exam) {
+        // 4Crear el examen usando el modelo
+        try {
+            $examId = Exam::create($data);
+        } catch (\PDOException $e) {
             Response::json([
-                "error" => "No se pudo crear el examen"
+                "error" => "Error en la base de datos",
+                "detalle" => $e->getMessage()
             ], 500);
-            return;
+            exit;
         }
 
+        // Responder al cliente
         Response::json([
             "message" => "Examen creado",
-            "id" => $exam
+            "id" => $examId
         ], 201);
     }
 
@@ -204,47 +219,47 @@ class ExamController
         ]);
     }
 
-public static function submit($examId, $data = null)
-{
-    $data = json_decode(file_get_contents("php://input"), true);
+    public static function submit($examId, $data = null)
+    {
+        $data = json_decode(file_get_contents("php://input"), true);
 
-    if (!$data) {
+        if (!$data) {
+            Response::json([
+                "error" => "No se recibieron datos"
+            ], 400);
+            return;
+        }
+
+        if (!is_numeric($examId)) {
+            Response::json(["error" => "ID invalido"], 400);
+            return;
+        }
+
+        if (empty($data["answers"]) || !is_array($data["answers"])) {
+            Response::json(["error" => "Respuestas invalidas"], 400);
+            return;
+        }
+
+        $exam = Exam::find($examId);
+
+        if (!$exam) {
+            Response::json(["error" => "Examen no encontrado"], 404);
+            return;
+        }
+
+        $userId = 1; // temporal
+
+        $result = ExamResult::createFromSubmission(
+            $examId,
+            $userId,
+            $data["answers"]
+        );
+
         Response::json([
-            "error" => "No se recibieron datos"
-        ], 400);
-        return;
+            "message" => "Examen enviado correctamente",
+            "result" => $result
+        ], 201);
     }
-
-    if (!is_numeric($examId)) {
-        Response::json(["error" => "ID invalido"], 400);
-        return;
-    }
-
-    if (empty($data["answers"]) || !is_array($data["answers"])) {
-        Response::json(["error" => "Respuestas invalidas"], 400);
-        return;
-    }
-
-    $exam = Exam::find($examId);
-
-    if (!$exam) {
-        Response::json(["error" => "Examen no encontrado"], 404);
-        return;
-    }
-
-    $userId = 1; // temporal
-
-    $result = ExamResult::createFromSubmission(
-        $examId,
-        $userId,
-        $data["answers"]
-    );
-
-    Response::json([
-        "message" => "Examen enviado correctamente",
-        "result" => $result
-    ], 201);
-}
 
     public static function take($examId)
     {
@@ -299,25 +314,26 @@ public static function submit($examId, $data = null)
         ]);
     }
 
-    public static function getByCourse($courseId){
+    public static function getByCourse($courseId)
+    {
 
-    if(!is_numeric($courseId)){
-        Response::json([
-            "error" => "Id del curso invalido"
-        ],400);
-        return;
-    }
+        if (!is_numeric($courseId)) {
+            Response::json([
+                "error" => "Id del curso invalido"
+            ], 400);
+            return;
+        }
 
-    $courses = Course::find($courseId);
+        $courses = Course::find($courseId);
 
-    if(!$courses){
-        Response::json([
-            "error" => "Curso no encontrado"
-        ],404);
-        return;
-    }
+        if (!$courses) {
+            Response::json([
+                "error" => "Curso no encontrado"
+            ], 404);
+            return;
+        }
 
-    $exams = Exam::getExamByCourse($courseId);
-    Response::json($exams);
+        $exams = Exam::getExamByCourse($courseId);
+        Response::json($exams);
     }
 }
