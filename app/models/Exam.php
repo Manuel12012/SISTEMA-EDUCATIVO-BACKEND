@@ -126,27 +126,29 @@ SELECT
         $db = Database::connect();
 
         $sql = "
-SELECT 
-    e.id,
-    e.course_id,
-    c.titulo AS course_titulo,
-    e.titulo,
-    e.duracion_minutos,
-    e.created_at,
-    e.created_by,
-    e.activo,
-    COUNT(q.id) AS questions_count
-FROM exams e
-LEFT JOIN courses c ON c.id = e.course_id
-LEFT JOIN questions q ON q.exam_id = e.id
-GROUP BY 
-    e.id,
-    c.titulo,
-    e.titulo,
-    e.duracion_minutos,
-    e.created_at,
-    e.created_by,
-    e.activo;
+            SELECT 
+                e.id,
+                e.course_id,
+                c.titulo AS course_titulo,
+                c.color AS course_color,
+                e.titulo,
+                e.duracion_minutos,
+                e.created_at,
+                e.created_by,
+                e.activo,
+                COUNT(q.id) AS questions_count
+                FROM exams e
+                LEFT JOIN courses c ON c.id = e.course_id
+                LEFT JOIN questions q ON q.exam_id = e.id
+                GROUP BY 
+                e.id,
+                c.titulo,
+                e.titulo,
+                e.duracion_minutos,
+                e.created_at,
+                e.created_by,
+                e.activo,
+                c.color;
 
     ";
 
