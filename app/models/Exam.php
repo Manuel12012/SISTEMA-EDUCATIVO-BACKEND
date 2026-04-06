@@ -219,7 +219,7 @@ SELECT
                 e.created_at,
                 e.created_by,
                 e.activo,
-                e.course_color,
+                c.color AS course_color,
                 COUNT(q.id) AS questions_count
             FROM exams e
             LEFT JOIN courses c ON c.id = e.course_id
