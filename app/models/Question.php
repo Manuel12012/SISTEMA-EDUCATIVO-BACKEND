@@ -86,21 +86,23 @@ class Question extends Model
         $db = Database::connect();
 
         $sql = "
-SELECT 
-    q.id,
-    q.exam_id,
-    q.pregunta,
-    q.correct_option_id,
-    COUNT(eo.id) AS option_count
-FROM questions q
-LEFT JOIN exam_options eo 
-    ON eo.question_id = q.id
-GROUP BY 
-    q.id,
-    q.exam_id,
-    q.pregunta,
-    q.correct_option_id;
-    ";
+        SELECT 
+            q.id,
+            q.exam_id,
+            q.pregunta,
+            q.correct_option_id,
+            q.points,
+            COUNT(eo.id) AS option_count
+        FROM questions q
+        LEFT JOIN exam_options eo 
+            ON eo.question_id = q.id
+        GROUP BY 
+            q.id,
+            q.exam_id,
+            q.pregunta,
+            q.points,
+            q.correct_option_id;
+            ";
 
         $stmt = $db->query($sql);
 
