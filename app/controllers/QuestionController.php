@@ -71,7 +71,8 @@ class QuestionController
         // si no existen esos campos entonces mandamos un response con datos incompletos
         if (
             empty($data["exam_id"]) ||
-            empty($data["pregunta"])
+            empty($data["pregunta"]) ||
+            empty($data["points"])
         ) {
             Response::json([
                 "error" => "Datos incompletos"
