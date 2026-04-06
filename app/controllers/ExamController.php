@@ -46,6 +46,7 @@ class ExamController
 
         Response::json($getQuestions);
     }
+    
     public static function allWithQuestionCount()
     {
         $exams = Exam::allWithQuestionCount();

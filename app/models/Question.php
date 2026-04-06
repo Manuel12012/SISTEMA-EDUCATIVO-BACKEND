@@ -60,12 +60,13 @@ class Question extends Model
         $db = Database::connect();
         $stmt = $db->prepare(
             "UPDATE questions SET exam_id = :exam_id, pregunta = :pregunta,
-                correct_option_id = :correct_option_id
+                correct_option_id = :correct_option_id, points = :points
             WHERE id = :id"
         ); // retornamos igual un stmt y lo almacenamos en un array $data y tambien el $questionId
         return $stmt->execute([
             "exam_id" => $data["exam_id"],
             "pregunta" => $data["pregunta"],
+            "points" => $data["points"],
             "correct_option_id" => $data["correct_option_id"],
             "id" => $questionId
         ]);
@@ -86,21 +87,23 @@ class Question extends Model
         $db = Database::connect();
 
         $sql = "
-SELECT 
-    q.id,
-    q.exam_id,
-    q.pregunta,
-    q.correct_option_id,
-    COUNT(eo.id) AS option_count
-FROM questions q
-LEFT JOIN exam_options eo 
-    ON eo.question_id = q.id
-GROUP BY 
-    q.id,
-    q.exam_id,
-    q.pregunta,
-    q.correct_option_id;
-    ";
+        SELECT 
+            q.id,
+            q.exam_id,
+            q.pregunta,
+            q.correct_option_id,
+            q.points,
+            COUNT(eo.id) AS option_count
+        FROM questions q
+        LEFT JOIN exam_options eo 
+            ON eo.question_id = q.id
+        GROUP BY 
+            q.id,
+            q.exam_id,
+            q.pregunta,
+            q.points,
+            q.correct_option_id;
+            ";
 
         $stmt = $db->query($sql);
 

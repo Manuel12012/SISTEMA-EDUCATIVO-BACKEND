@@ -29,12 +29,13 @@ class Exam extends Model
             q.exam_id,
             q.pregunta,
             q.correct_option_id,
+            q.points,
             COUNT(eo.id) AS option_count
         FROM questions q
         LEFT JOIN exam_options eo 
             ON eo.question_id = q.id
         WHERE q.exam_id = :exam_id
-        GROUP BY q.id, q.exam_id, q.pregunta, q.correct_option_id
+        GROUP BY q.id, q.exam_id, q.pregunta, q.correct_option_id, q.points
     ";
 
         $stmt = $db->prepare($sql);
@@ -126,27 +127,29 @@ SELECT
         $db = Database::connect();
 
         $sql = "
-SELECT 
-    e.id,
-    e.course_id,
-    c.titulo AS course_titulo,
-    e.titulo,
-    e.duracion_minutos,
-    e.created_at,
-    e.created_by,
-    e.activo,
-    COUNT(q.id) AS questions_count
-FROM exams e
-LEFT JOIN courses c ON c.id = e.course_id
-LEFT JOIN questions q ON q.exam_id = e.id
-GROUP BY 
-    e.id,
-    c.titulo,
-    e.titulo,
-    e.duracion_minutos,
-    e.created_at,
-    e.created_by,
-    e.activo;
+            SELECT 
+                e.id,
+                e.course_id,
+                c.titulo AS course_titulo,
+                c.color AS course_color,
+                e.titulo,
+                e.duracion_minutos,
+                e.created_at,
+                e.created_by,
+                e.activo,
+                COUNT(q.id) AS questions_count
+                FROM exams e
+                LEFT JOIN courses c ON c.id = e.course_id
+                LEFT JOIN questions q ON q.exam_id = e.id
+                GROUP BY 
+                e.id,
+                c.titulo,
+                e.titulo,
+                e.duracion_minutos,
+                e.created_at,
+                e.created_by,
+                e.activo,
+                c.color;
 
     ";
 
