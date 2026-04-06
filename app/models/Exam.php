@@ -216,6 +216,7 @@ GROUP BY
                 e.created_at,
                 e.created_by,
                 e.activo,
+                e.course_color,
                 COUNT(q.id) AS questions_count
             FROM exams e
             LEFT JOIN courses c ON c.id = e.course_id
@@ -228,7 +229,8 @@ GROUP BY
                 e.duracion_minutos,
                 e.created_at,
                 e.created_by,
-                e.activo
+                e.activo,
+                e.course_color
         ";
     
         $stmt = $db->prepare($sql);
