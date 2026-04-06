@@ -59,7 +59,8 @@ class CourseController
         if (
             empty($data["titulo"]) ||
             empty($data["descripcion"]) ||
-            empty($data["grado"])
+            empty($data["grado"]) ||
+            empty($data["color"])
         ) {
             Response::json([
                 "error" => "Datos incompletos"

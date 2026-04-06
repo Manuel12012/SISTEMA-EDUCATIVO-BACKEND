@@ -11,7 +11,8 @@ class Course extends Model
         $db = Database::connect();
         $stmt = $db->prepare(
             "SELECT * FROM "
-        . self::$table);
+                . self::$table
+        );
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -30,13 +31,14 @@ class Course extends Model
     {
         $db = Database::connect();
         $stmt = $db->prepare(
-            "INSERT INTO courses (titulo, descripcion, grado, imagen_url)
-                VALUES (:titulo, :descripcion, :grado, :imagen_url)"
+            "INSERT INTO courses (titulo, descripcion, grado, imagen_url, color)
+                VALUES (:titulo, :descripcion, :grado, :imagen_url, :color)"
         );
         $stmt->execute([
             "titulo" => $data["titulo"],
             "descripcion" => $data["descripcion"],
             "grado" => $data["grado"],
+            "color" => $data["color"],
             "imagen_url" => $data["imagen_url"] ?? "",
         ]);
         return (int) $db->lastInsertId();
@@ -47,7 +49,7 @@ class Course extends Model
         $db = Database::connect();
         $stmt = $db->prepare(
             "UPDATE courses SET titulo = :titulo, descripcion = :descripcion,
-                grado = :grado, imagen_url = :imagen_url
+                grado = :grado, imagen_url = :imagen_url, color = :color
             WHERE id = :id"
         ); // retornamos igual un stmt y lo almacenamos en un array $data y tambien el $questionId
         return $stmt->execute([
@@ -55,6 +57,7 @@ class Course extends Model
             "descripcion" => $data["descripcion"],
             "grado" => $data["grado"],
             "imagen_url" => $data["imagen_url"] ?? "",
+            "color" => $data["color"],
             "id" => $courseId
         ]);
     }
@@ -80,6 +83,7 @@ class Course extends Model
             c.descripcion,
             c.grado,
             c.imagen_url,
+            c.color,
             COUNT(m.id) AS modules_count
             FROM courses c
             LEFT JOIN modules m ON m.course_id = c.id
@@ -88,24 +92,26 @@ class Course extends Model
             c.titulo,
             c.descripcion,
             c.grado,
-            c.imagen_url
+            c.imagen_url,
+            c.color
         ";
         $stmt = $db->query($sql);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function getByTitle ($titulo){
+    public static function getByTitle($titulo)
+    {
         $db = Database::connect();
 
-        $stmt = $db -> prepare (
+        $stmt = $db->prepare(
             "SELECT * FROM courses WHERE titulo LIKE :titulo"
         );
 
-        $stmt -> bindValue(":titulo", "%".$titulo. "%");
+        $stmt->bindValue(":titulo", "%" . $titulo . "%");
 
-        $stmt -> execute();
+        $stmt->execute();
 
-        return $stmt -> fetchAll(PDO::FETCH_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
