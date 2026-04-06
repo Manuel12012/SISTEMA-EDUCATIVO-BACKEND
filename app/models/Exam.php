@@ -29,12 +29,13 @@ class Exam extends Model
             q.exam_id,
             q.pregunta,
             q.correct_option_id,
+            q.points,
             COUNT(eo.id) AS option_count
         FROM questions q
         LEFT JOIN exam_options eo 
             ON eo.question_id = q.id
         WHERE q.exam_id = :exam_id
-        GROUP BY q.id, q.exam_id, q.pregunta, q.correct_option_id
+        GROUP BY q.id, q.exam_id, q.pregunta, q.correct_option_id, q.points
     ";
 
         $stmt = $db->prepare($sql);
