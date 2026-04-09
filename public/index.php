@@ -1,7 +1,18 @@
 <?php
+
+// ----------------- SERVIR ARCHIVOS ESTÁTICOS -----------------
+$path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+$file = __DIR__ . $path;
+
+if ($path !== "/" && file_exists($file)) {
+    return false;
+}
 // ----------------- CORS -----------------
 $allowedOrigins = [
     'http://localhost:5173', // desarrollo
+    'http://localhost:8000', // desarrollo
+    'http://localhost:3000', // desarrollo
+    'https://localhost:3000', // desarrollo
     'https://cosmic-sunshine-8bd634.netlify.app', // producción
 ];
 

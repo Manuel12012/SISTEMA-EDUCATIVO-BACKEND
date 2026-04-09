@@ -1,18 +1,12 @@
 <?php
 class Database {
     public static function connect() {
-        // Intenta obtener variables de entorno, si no existen, usa valores por defecto que funcionan en Railway
-        $host = getenv('MYSQLHOST') ?: $_ENV['MYSQLHOST'] ?? 'mysql.railway.internal';
-        $db   = getenv('MYSQLDATABASE') ?: $_ENV['MYSQLDATABASE'] ?? 'railway';
-        $user = getenv('MYSQLUSER') ?: $_ENV['MYSQLUSER'] ?? 'root';
-        $pass = getenv('MYSQLPASSWORD') ?: $_ENV['MYSQLPASSWORD'] ?? 'svgZMCxejMssJCljNDDucZjTOFKmnlGc';
-        $port = getenv('MYSQLPORT') ?: $_ENV['MYSQLPORT'] ?? 3306;
 
-        if (!$host || !$db || !$user || !$pass) {
-            die(json_encode([
-                "error" => "Variables de entorno de MySQL no encontradas"
-            ]));
-        }
+        $host = getenv('MYSQLHOST') ?: ($_ENV['MYSQLHOST'] ?? "127.0.0.1");
+        $db   = getenv('MYSQLDATABASE') ?: ($_ENV['MYSQLDATABASE'] ?? "plataforma-educativa");
+        $user = getenv('MYSQLUSER') ?: ($_ENV['MYSQLUSER'] ?? "root");
+        $pass = getenv('MYSQLPASSWORD') ?: ($_ENV['MYSQLPASSWORD'] ?? "");
+        $port = getenv('MYSQLPORT') ?: ($_ENV['MYSQLPORT'] ?? 3306);
 
         try {
             return new PDO(

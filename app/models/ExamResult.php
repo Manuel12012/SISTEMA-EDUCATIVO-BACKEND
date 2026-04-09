@@ -261,9 +261,26 @@ class ExamResult extends Model
                 "puntos_ganados" => $puntosGanados
             ];
         } catch (Exception $e) {
-    echo "ERROR: " . $e->getMessage();
-    $db->rollBack();
-    exit;
+            echo "ERROR: " . $e->getMessage();
+            $db->rollBack();
+            exit;
         }
     }
+
+    public static function existsByUser($examId, $userId)
+{
+    $db = Database::connect();
+
+    $stmt = $db->prepare("
+        SELECT id 
+        FROM exam_results
+        WHERE exam_id = ?
+        AND user_id = ?
+        LIMIT 1
+    ");
+
+    $stmt->execute([$examId, $userId]);
+
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 }

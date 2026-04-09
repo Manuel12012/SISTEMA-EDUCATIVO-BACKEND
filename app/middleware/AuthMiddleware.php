@@ -42,4 +42,10 @@ class AuthMiddleware
             exit;
         }
     }
+
+    public static function getUserId()
+    {
+        $decoded = AuthMiddleware::verify();
+        return $decoded->id ?? null;
+    }
 }

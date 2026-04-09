@@ -43,12 +43,13 @@ class Question extends Model
     { // $data contiene los datos de la pregunta a insertar
         $db = Database::connect();
         $stmt = $db->prepare(
-            "INSERT INTO questions (exam_id, pregunta, correct_option_id)
-                    VALUES (:exam_id, :pregunta, :correct_option_id)"
+            "INSERT INTO questions (exam_id, pregunta, correct_option_id, points)
+                    VALUES (:exam_id, :pregunta, :correct_option_id, :points)"
         );
         $stmt->execute([
             "exam_id" => $data["exam_id"],
             "pregunta" => $data["pregunta"],
+            "points" => $data["points"],
             "correct_option_id" => $data["correct_option_id"]
         ]);
         // retornamos con lastInsertId porque sera de manera auto_increment

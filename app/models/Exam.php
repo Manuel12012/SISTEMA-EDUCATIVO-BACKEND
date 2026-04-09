@@ -191,18 +191,28 @@ SELECT
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public static function getExamByCourse($courseId)
+    public static function getExamByCourse($courseId, $userId)
     {
         $db = Database::connect();
-
-        $stmt = $db->prepare(
-            "
-        SELECT e.*
-        FROM exams e
-        JOIN courses c ON c.id = e.course_id
-        WHERE c.id = :id"
-        );
-        $stmt->execute(["id" => $courseId]);
+    
+        $stmt = $db->prepare("
+            SELECT 
+                e.*,
+                EXISTS(
+                    SELECT 1
+                    FROM exam_results er
+                    WHERE er.exam_id = e.id
+                    AND er.user_id = :user_id
+                ) AS ya_rendido
+            FROM exams e
+            WHERE e.course_id = :course_id
+        ");
+    
+        $stmt->execute([
+            "course_id" => $courseId,
+            "user_id" => $userId
+        ]);
+    
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     public static function getByTitle($titulo)
@@ -233,7 +243,7 @@ SELECT
                 e.created_at,
                 e.created_by,
                 e.activo,
-                e.course_color
+                c.color
         ";
     
         $stmt = $db->prepare($sql);

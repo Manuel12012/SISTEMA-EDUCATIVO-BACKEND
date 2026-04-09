@@ -5,6 +5,7 @@ require_once __DIR__ . '/../models/Question.php';
 require_once __DIR__ . '/../models/ExamOption.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../models/ExamResult.php';
+require_once __DIR__ . '/../models/ExamAttempt.php';
 
 use App\Middleware\AuthMiddleware;
 
@@ -14,13 +15,13 @@ class ExamController
     public static function index()
     {
         $titulo = $_GET["titulo"] ?? null;
-    
+
         if ($titulo) {
             $exams = Exam::getByTitle($titulo);
         } else {
             $exams = Exam::allWithQuestionCount(); // comportamiento por defecto
         }
-    
+
         Response::json($exams);
     }
 
@@ -46,7 +47,7 @@ class ExamController
 
         Response::json($getQuestions);
     }
-    
+
     public static function allWithQuestionCount()
     {
         $exams = Exam::allWithQuestionCount();
@@ -221,6 +222,14 @@ class ExamController
 
     public static function submit($examId, $data = null)
     {
+
+        $decoded = AuthMiddleware::verify();
+        $userId = $decoded->id ?? null;
+
+        if (!$userId) {
+            Response::json(["error" => "Usuario no válido"], 401);
+            return;
+        }
         $data = json_decode(file_get_contents("php://input"), true);
 
         if (!$data) {
@@ -247,8 +256,6 @@ class ExamController
             return;
         }
 
-        $userId = 1; // temporal
-
         $result = ExamResult::createFromSubmission(
             $examId,
             $userId,
@@ -263,6 +270,22 @@ class ExamController
 
     public static function take($examId)
     {
+        $decoded = AuthMiddleware::verify();
+        $userId = $decoded->id ?? null;
+    
+        if (!$userId) {
+            Response::json(["error" => "Usuario no válido"], 401);
+            return;
+        }
+    
+        $alreadyTaken = ExamResult::existsByUser($examId, $userId);
+    
+        if ($alreadyTaken) {
+            Response::json([
+                "error" => "Ya rendiste este examen"
+            ], 403);
+            return;
+        }
         if (!is_numeric($examId)) {
             Response::json([
                 "error" => "ID invalido"
@@ -279,10 +302,22 @@ class ExamController
             return;
         }
 
+        // 🔥 verificar intento activo
+        $attempt = ExamAttempt::getActiveAttempt($examId, $userId);
+
+        if (!$attempt) {
+
+            ExamAttempt::createAttempt(
+                $examId,
+                $userId,
+                $exam["duracion_minutos"]
+            );
+
+            $attempt = ExamAttempt::getActiveAttempt($examId, $userId);
+        }
+
         // Obtener preguntas
         $questions = Question::getByExam($examId);
-
-        $filteredQuestions = [];
 
         $filteredQuestions = [];
 
@@ -294,11 +329,9 @@ class ExamController
                 continue;
             }
 
-            // 🔥 Eliminar datos sensibles de la pregunta
             unset($q['correct_option_id']);
             unset($q['exam_id']);
 
-            // 🔥 Eliminar is_correct de cada opción
             foreach ($options as &$option) {
                 unset($option['is_correct']);
             }
@@ -310,12 +343,19 @@ class ExamController
 
         Response::json([
             "exam" => $exam,
-            "questions" => $filteredQuestions
+            "questions" => $filteredQuestions,
+            "expires_at" => $attempt["expires_at"] // 🔥 tiempo real
         ]);
     }
-
     public static function getByCourse($courseId)
     {
+        $decoded = AuthMiddleware::verify();
+        $userId = $decoded->id ?? null;
+
+        if (!$userId) {
+            Response::json(["error" => "Usuario no válido"], 401);
+            return;
+        }
 
         if (!is_numeric($courseId)) {
             Response::json([
@@ -333,7 +373,8 @@ class ExamController
             return;
         }
 
-        $exams = Exam::getExamByCourse($courseId);
+        $exams = Exam::getExamByCourse($courseId, $userId);
+
         Response::json($exams);
     }
 }

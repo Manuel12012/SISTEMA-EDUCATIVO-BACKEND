@@ -11,11 +11,11 @@ class CourseController
     {
         $titulo = $_GET["titulo"] ?? null;
 
-        if($titulo){
+        if ($titulo) {
             $courses = Course::getByTitle($titulo);
-        } else{
+        } else {
             $courses = Course::all();
-        }  
+        }
 
         // validacion si existe el curso o no
         if (empty($courses)) {
@@ -52,10 +52,10 @@ class CourseController
 
         Response::json($course);
     }
-
-    public static function store($data)
+    public static function store()
     {
-         $data = json_decode(file_get_contents("php://input"), true);
+        $data = json_decode(file_get_contents("php://input"), true);
+    
         if (
             empty($data["titulo"]) ||
             empty($data["descripcion"]) ||
@@ -67,16 +67,9 @@ class CourseController
             ], 400);
             exit;
         }
-
+    
         $course = Course::create($data);
-
-        if (!$course) {
-            Response::json([
-                "error" => "No se pudo crear el curso"
-            ], 500);
-            exit;
-        }
-
+    
         Response::json([
             "message" => "Curso creado",
             "id" => $course
@@ -179,51 +172,54 @@ class CourseController
             return;
         }
         Response::json($courses);
-
-        
     }
 
     public static function uploadImage()
-{
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        $file = $_FILES['image'];
+    {
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+            $file = $_FILES['image'];
 
-        // Crear carpeta si no existe
-        $uploadDir = __DIR__ . '/../../public/uploads/courses/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
+            // Crear carpeta si no existe
+            $uploadDir = __DIR__ . "/../../public/uploads/courses/";
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
 
-        // Crear nombre único siempre en .jpg
-        $filename = time() . '_' . pathinfo($file['name'], PATHINFO_FILENAME) . '.jpg';
-        $destination = $uploadDir . $filename;
+            $allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
-        // Detectar tipo y convertir a JPG con GD
-$mime = $file['type'];
-        $image = match($mime) {
-            'image/jpeg' => imagecreatefromjpeg($file['tmp_name']),
-            'image/png'  => imagecreatefrompng($file['tmp_name']),
-            'image/gif'  => imagecreatefromgif($file['tmp_name']),
-            'image/webp' => imagecreatefromwebp($file['tmp_name']),
-            default      => null
-        };
+            if (!in_array($file['type'], $allowed)) {
+                Response::json(["error" => "Tipo de archivo no permitido"]);
+                return;
+            }
+            // Crear nombre único siempre en .jpg
+            $filename = uniqid() . '.jpg';
+            $destination = $uploadDir . $filename;
 
-        if (!$image) {
-            Response::json(['error' => 'Formato no soportado']);
-            return;
-        }
+            // Detectar tipo y convertir a JPG con GD
+            $mime = $file['type'];
+            $image = match ($mime) {
+                'image/jpeg' => imagecreatefromjpeg($file['tmp_name']),
+                'image/png'  => imagecreatefrompng($file['tmp_name']),
+                'image/gif'  => imagecreatefromgif($file['tmp_name']),
+                'image/webp' => imagecreatefromwebp($file['tmp_name']),
+                default      => null
+            };
 
-        // Guardar siempre como JPG
-        if (imagejpeg($image, $destination, 90)) {
-            imagedestroy($image); // liberar memoria
-            $url = '/uploads/courses/' . $filename;
-            Response::json(['imageUrl' => $url]);
+            if (!$image) {
+                Response::json(['error' => 'Formato no soportado']);
+                return;
+            }
+
+            // Guardar siempre como JPG
+            if (imagejpeg($image, $destination, 90)) {
+                imagedestroy($image); // liberar memoria
+                $url = '/uploads/courses/' . $filename;
+                Response::json(['imageUrl' => $url]);
+            } else {
+                Response::json(['error' => 'Error al guardar la imagen']);
+            }
         } else {
-            Response::json(['error' => 'Error al guardar la imagen']);
+            Response::json(['error' => 'No se envió archivo']);
         }
-
-    } else {
-        Response::json(['error' => 'No se envió archivo']);
     }
-}
 }
