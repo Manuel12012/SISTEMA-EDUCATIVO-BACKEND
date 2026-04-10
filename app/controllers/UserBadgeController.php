@@ -1,5 +1,7 @@
 <?php
 
+use App\helpers\Validator;
+
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/UserBadge.php';
 require_once __DIR__ . '/../core/Response.php';
@@ -9,22 +11,10 @@ class UserBadgeController
 {
     public static function indexByUser($userId)
     {
-        if (!is_numeric($userId)) {
-            Response::json([
-                "error" => "Id de usuario inválido"
-            ], 400);
-            return;
-        }
-
+        Validator::validateId($userId);
         $user = User::find($userId);
 
-        if (!$user) {
-            Response::json([
-                "error" => "Usuario no encontrado"
-            ], 404);
-            return;
-        }
-
+        Validator::notFound($user, "Usuario");
         $badges = UserBadge::getBadgesByUser((int)$userId);
 
         Response::json([

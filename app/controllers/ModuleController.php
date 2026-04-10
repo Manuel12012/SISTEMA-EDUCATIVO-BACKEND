@@ -1,5 +1,7 @@
 <?php
 
+use App\helpers\Validator;
+
 require_once __DIR__ . '/../models/Module.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../models/Course.php';
@@ -9,21 +11,10 @@ class ModuleController
 {
     public static function byCourse($courseId)
     {
-        if (!is_numeric($courseId)) {
-            Response::json([
-                "error" => "ID de módulo inválido"
-            ], 400);
-            return;
-        }
-
+        Validator::validateId($courseId);
         $courses = Course::find($courseId);
 
-        if (!$courses) {
-            Response::json([
-                "error" => "Curso no encontrado"
-            ], 404);
-            return;
-        }
+        Validator::notFound($courses, "Cursos");
 
         $modules = Module::getByCourse($courseId);
 
@@ -51,23 +42,10 @@ class ModuleController
 
     public static function show($moduleId)
     {
-        if (!is_numeric(value: $moduleId)) {
-            Response::json(
-                [
-                    "error" => "Id del modulo invalido"
-                ]
-            );
-            return;
-        }
-
+        Validator::validateId($moduleId);
         $modules = Module::find($moduleId);
 
-        if (!$modules) {
-            Response::json([
-                "error" => "Modulo no encontrado"
-            ]);
-            return;
-        }
+       Validator::notFound($modules, "Modulo");
         Response::json($modules);
     }
 
@@ -101,18 +79,8 @@ class ModuleController
 
     public static function update($moduleId, $data)
     {
-        if (!is_numeric($moduleId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
-
+        Validator::validateId($moduleId);
         $modules = Module::find($moduleId);
-
 
         if (!$modules) {
             Response::json([
@@ -136,25 +104,10 @@ class ModuleController
 
     public static function destroy($moduleId)
     {
-        if (!is_numeric($moduleId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
-
+        Validator::validateId($moduleId);
         $modules = Module::find($moduleId);
 
-        if (!$modules) {
-            Response::json([
-                "error" => "No se pudo encontrar el modulo"
-            ], 404);
-            return;
-        }
-
+        Validator::notFound($modules, "Modulo");
         $deleted = Module::delete($moduleId);
 
         if (!$deleted) {

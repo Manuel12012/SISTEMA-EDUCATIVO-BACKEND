@@ -1,77 +1,45 @@
 <?php
 
+use App\helpers\Validator;
+
 require_once __DIR__ . '/../models/User.php';
-require_once __DIR__ .'/../core/Response.php';
-require_once __DIR__ .'/../models/PointHistory.php';
+require_once __DIR__ . '/../core/Response.php';
+require_once __DIR__ . '/../models/PointHistory.php';
 
 
 class PointHistoryController
-{public static function byUser($userId)
 {
-    // Validar ID
-    if (!is_numeric($userId)) {
+    public static function byUser($userId)
+    {
+        Validator::validateId($userId);
+        // Verificar que el usuario exista
+        $user = User::find($userId);
+
+        Validator::notFound($user, "Usuario");
+
+        // Obtener historial de puntos del usuario
+        $histories = PointsHistory::getByUser($userId);
+
         Response::json([
-            "error" => "ID de usuario inválido"
-        ], 400);
-    return;
+            "user_id" => $userId,
+            "point_histories" => $histories
+        ]);
     }
-
-    // Verificar que el usuario exista
-    $user = User::find($userId);
-
-    if (!$user) {
-        Response::json([
-            "error" => "Usuario no encontrado"
-        ], 404);
-    return;
-    }
-
-    // Obtener historial de puntos del usuario
-    $histories = PointsHistory::getByUser($userId);
-
-    Response::json([
-        "user_id" => $userId,
-        "point_histories" => $histories
-    ]);
-}
 
 
     public static function index()
     {
         $histories = PointsHistory::all();
-
-        if (empty($histories)) {
-            Response::json(
-                [
-                    "error" => "No se encontro el historial de puntos"
-                ],404
-            );
-                return;
-
-        }
+        Validator::emptyCollection($histories, "Historiales");
         Response::json($histories);
     }
 
     public static function show($pointHistoryId)
     {
-        if (!is_numeric($pointHistoryId)) {
-            Response::json(
-                [
-                    "error" => "Id del historial de puntos no valido"
-                ]
-            );
-            return;
-        }
-
+        Validator::validateId($pointHistoryId);
         $histories = PointsHistory::find($pointHistoryId);
 
-        if (!$histories) {
-            Response::json([
-                "error" => "Historial de puntos no encontrado"
-            ]);
-            return;
-        }
-
+        Validator::notFound($histories, "Historial");
         Response::json([
             "pointHistory" => $histories
         ]);
@@ -79,25 +47,10 @@ class PointHistoryController
 
     public static function update($pointHistoryId, $data)
     {
-        if (!is_numeric($pointHistoryId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
-
+        Validator::validateId($pointHistoryId);
         $histories = PointsHistory::find($pointHistoryId);
 
-        if (!$histories) {
-            Response::json([
-                "error" => "Historial no encontrado"
-            ], 404);
-            return;
-        }
-
+        Validator::notFound($histories, "Historial");
         $updated = PointsHistory::update($pointHistoryId, $data);
 
         if (!$updated) {
@@ -113,29 +66,15 @@ class PointHistoryController
 
     public static function destroy($pointHistoryId)
     {
-        if (!is_numeric($pointHistoryId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
-
+        Validator::validateId($pointHistoryId);
         $histories = PointsHistory::find($pointHistoryId);
 
-        if (!$histories) {
-            Response::json([
-                "error" => "No se pudo encontrar el historial"
-            ], 404);
-            return;
-        }
+        Validator::notFound($histories, "Historial");
         $deleted = PointsHistory::delete($pointHistoryId);
 
-        if(!$deleted){
+        if (!$deleted) {
             Response::json([
-                "error"=> "No se pudo borrar el historial"
+                "error" => "No se pudo borrar el historial"
             ]);
             return;
         }

@@ -1,5 +1,7 @@
 <?php
 
+use App\helpers\Validator;
+
 require_once __DIR__ . '/../models/Course.php';
 require_once __DIR__ . '/../models/Module.php';
 require_once __DIR__ . '/../core/Response.php';
@@ -11,51 +13,27 @@ class CourseController
     {
         $titulo = $_GET["titulo"] ?? null;
 
-        if ($titulo) {
-            $courses = Course::getByTitle($titulo);
-        } else {
-            $courses = Course::all();
-        }
-
+        $courses = $titulo ? Course::getByTitle($titulo) : Course::all();
         // validacion si existe el curso o no
-        if (empty($courses)) {
-            Response::json(["error" => "No se encontraron cursos"], 404);
-            return;
-        }
-
+        Validator::emptyCollection($courses, "Cursos");
         // devolvemos un json pasandole la variable courses
         Response::json($courses);
     }
 
     public static function show($id)
     {
-        // validamos con la funcion is numeric si es un valor numero
-        if (!is_numeric($id)) {
-            // devolvemos un json que es llamado desde Response.php con el metodo json
-            Response::json([
-                "error" => "ID de curso invalido"
-            ], 400);
-            return;
-        }
+        Validator::validateId($id);
         // en la variable course usamos find y le pasamos el id como parametro
         $course = Course::find((int) $id);
         // si curso no existe entonces imprimira curso no encontrado
-        if (!$course) {
-            Response::json(
-                [
-                    "error" => "Curso no encontrado"
-                ],
-                404
-            );
-            exit;
-        }
+        Validator::notFound($course, "Curso");
 
         Response::json($course);
     }
     public static function store()
     {
         $data = json_decode(file_get_contents("php://input"), true);
-    
+
         if (
             empty($data["titulo"]) ||
             empty($data["descripcion"]) ||
@@ -67,9 +45,9 @@ class CourseController
             ], 400);
             exit;
         }
-    
+
         $course = Course::create($data);
-    
+
         Response::json([
             "message" => "Curso creado",
             "id" => $course
@@ -78,21 +56,11 @@ class CourseController
 
     public static function update($courseId, $data)
     {
-        if (!is_numeric($courseId)) {
-            Response::json([
-                "error" => "ID invalido"
-            ], 400);
-            return;
-        }
+        Validator::validateId($courseId);
 
         $course = Course::find($courseId);
 
-        if (!$course) {
-            Response::json([
-                "error" => "No se encontro el curso"
-            ]);
-            exit;
-        }
+        Validator::notFound($course, "Curso");
 
         $updated = Course::update($courseId, $data);
 
@@ -110,25 +78,10 @@ class CourseController
 
     public static function destroy($courseId)
     {
-        if (!is_numeric($courseId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            exit;
-        }
-
+        Validator::validateId($courseId);
         $course = Course::find($courseId);
 
-        if (!$course) {
-            Response::json([
-                "error" => "No se pudo encontrar el curso"
-            ], 404);
-            exit;
-        }
-
+        Validator::notFound($course, "Curso");
         Course::delete($courseId);
 
         Response::json([
@@ -138,24 +91,11 @@ class CourseController
 
     public static function modules($courseId)
     { // usamos esta funcion para traernos modulos mediante el id del curso
-        if (!is_numeric($courseId)) {
-            Response::json(
-                [
-                    "error" => "ID de curso invalido"
-                ],
-                400
-            );
-            exit;
-        }
+        Validator::validateId($courseId);
         $course = Course::find((int) $courseId);
 
         // si no existe course entonces mostramos curso no encontrado
-        if (!$course) {
-            Response::json([
-                "error" => "Curso no encontrado"
-            ], 404);
-            exit;
-        }
+        Validator::notFound($course, "Curso");
         // usamos getByCourse del modelo Module y le pasamos courseId y lo almacenamos en $modules
         $modules = Module::getByCourse((int)$courseId);
 
@@ -166,11 +106,7 @@ class CourseController
     public static function allWithModulesCount()
     {
         $courses = Course::allWithCourseCount();
-
-        if (empty($courses)) {
-            Response::json(["error" => "No se encontro el curso", 404]);
-            return;
-        }
+        Validator::emptyCollection($courses, "Cursos");
         Response::json($courses);
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\helpers\Validator;
+
 require_once __DIR__ . '/../models/Lesson.php';
 require_once __DIR__ . '/../models/Module.php';
 require_once __DIR__ . '/../core/Response.php';
@@ -9,21 +11,11 @@ class LessonController
 
     public static function byModule($moduleId)
     {
-        if (!is_numeric($moduleId)) {
-            Response::json([
-                "error" => "ID de módulo inválido"
-            ], 400);
-            return;
-        }
+        Validator::validateId($moduleId);
 
         $module = Module::find($moduleId);
 
-        if (!$module) {
-            Response::json([
-                "error" => "Módulo no encontrado"
-            ], 404);
-            return;
-        }
+        Validator::notFound($module, "Modulo");
 
         $lessons = Lesson::getByModule($moduleId);
 
@@ -33,38 +25,16 @@ class LessonController
     public static function index()
     {
         $lesson = Lesson::all();
-
-        if (empty($lesson)) {
-            Response::json(
-                [
-                    "error" => "No se encontro la leccion"
-                ],
-                404
-            );
-            return;
-        }
+        Validator::emptyCollection($lesson, "Lecciones");
         Response::json($lesson);
     }
 
     public static function show($lessonId)
     {
-        if (!is_numeric($lessonId)) {
-            Response::json(
-                [
-                    "error" => "Id de la leccion invalido"
-                ]
-            );
-            return;
-        }
-
+        Validator::validateId($lessonId);
         $lesson = Lesson::find($lessonId);
 
-        if (!$lesson) {
-            Response::json([
-                "error" => "Leccion no encontrada"
-            ]);
-            return;
-        }
+        Validator::notFound($lesson, "Leccion");
 
         $module = Module::getByLesson($lessonId);
 
@@ -75,8 +45,8 @@ class LessonController
             return;
         }
         Response::json(
-     $lesson
-           
+            $lesson
+
         );
     }
 
@@ -111,25 +81,11 @@ class LessonController
     }
     public static function update($lessonId, $data)
     {
-        if (!is_numeric($lessonId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
+        Validator::validateId($lessonId);
 
         $lesson = Lesson::find($lessonId);
 
-
-        if (!$lesson) {
-            Response::json([
-                "error" => "Leccion no encontrada"
-            ], 404);
-            return;
-        }
+        Validator::notFound($lesson, "Leccion");
 
         $updated = Lesson::update($lessonId, $data);
 
@@ -146,24 +102,12 @@ class LessonController
 
     public static function destroy($lessonId)
     {
-        if (!is_numeric($lessonId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
+        Validator::validateId($lessonId);
 
         $lesson = Lesson::find($lessonId);
 
-        if (!$lesson) {
-            Response::json([
-                "error" => "No se pudo encontrar la leccion"
-            ], 404);
-            return;
-        }
+        Validator::notFound($lesson, "Leccion");
+        
         Lesson::delete($lessonId);
 
         Response::json([

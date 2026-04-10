@@ -1,4 +1,7 @@
 <?php
+
+use App\helpers\Validator;
+
 require_once __DIR__ . '/../models/ExamResult.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../models/User.php';
@@ -12,9 +15,7 @@ class ExamResultController
 
 
         if (empty($examResult)) {
-            Response::json([
-               
-            ], 200);
+            Response::json([], 200);
             return;
         }
         Response::json($examResult);
@@ -22,46 +23,20 @@ class ExamResultController
 
     public static function show($examResultId)
     {
-        if (!is_numeric($examResultId)) {
-            Response::json([
-                "error" => "Id del resultado invalido"
-            ], 400);
-                        return;
-        }
-
+        Validator::validateId($examResultId);
         $examResult = ExamResult::find($examResultId);
 
-        if (!$examResult) {
-            Response::json([
-                "error" => "Resultado no encontrado"
-            ], 404);
-            return;
-        }
-
+        Validator::notFound($examResult, "Resultado");
         Response::json($examResult);
     }
 
 
     public static function update($examResultId, $data)
     {
-        if (!is_numeric($examResultId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
-
+        Validator::validateId($examResultId);
         $examResult = ExamResult::find($examResultId);
 
-        if (!$examResult) {
-            Response::json([
-                "error" => "Resultado del examen no encontrada"
-            ], 404);
-            return;
-        }
+        Validator::notFound($examResult, "Resultado");
 
         $updated = ExamResult::update($examResultId, $data);
 
@@ -79,26 +54,10 @@ class ExamResultController
 
     public static function destroy($examResultId)
     {
-
-        if (!is_numeric($examResultId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
-
+        Validator::validateId($examResultId);
         $examResult = ExamResult::find($examResultId);
 
-        if (!$examResult) {
-            Response::json([
-                "error" => "No se pudo encontrar el resultado"
-            ], 404);
-            return;
-        }
-
+        Validator::notFound($examResult, "Resultado");
         ExamResult::delete($examResultId);
 
         Response::json([
@@ -108,48 +67,20 @@ class ExamResultController
 
     public static function getByUserAndExam($userId, $examId)
     {
-        // primero validamos si es valido
-        if (!is_numeric($userId)) {
-            Response::json([
-                "error" => "Id del usuario invalido"
-            ], 400);
-            return;
-        }
-
+        Validator::validateId($userId);
         // accedemos al recurso 
         $user = User::find($userId);
 
-        // verificamos si existe
-        if (!$user) {
-            Response::json([
-                "error" => "Usuario no encontrado"
-            ], 404);
-            return;
-        }
+        Validator::notFound($user, "Usuario");
 
-        if (!is_numeric($examId)) {
-            Response::json([
-                "error" => "Id del examen invalido"
-            ], 400);
-            return;
-        }
+        Validator::validateId($examId);
         $exam = Exam::find($examId);
 
-        if (!$exam) {
-            Response::json([
-                "error" => "Examen no encontrado"
-            ], 404);
-            return;
-        }
+        Validator::notFound($exam, "Examen");
 
         $examResult = ExamResult::getByUserAndExam($userId, $examId);
 
-        if (!$examResult) {
-            Response::json([
-                "error" => "No se pudo encontrar el resultado"
-            ], 404);
-            return;
-        }
+        Validator::notFound($examResult, "Resultado");
 
         Response::json([
             "user" => $user,

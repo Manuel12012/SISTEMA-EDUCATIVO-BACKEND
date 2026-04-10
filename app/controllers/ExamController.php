@@ -8,6 +8,7 @@ require_once __DIR__ . '/../models/ExamResult.php';
 require_once __DIR__ . '/../models/ExamAttempt.php';
 
 use App\Middleware\AuthMiddleware;
+use App\helpers\Validator;
 
 class ExamController
 {
@@ -16,11 +17,7 @@ class ExamController
     {
         $titulo = $_GET["titulo"] ?? null;
 
-        if ($titulo) {
-            $exams = Exam::getByTitle($titulo);
-        } else {
-            $exams = Exam::allWithQuestionCount(); // comportamiento por defecto
-        }
+        $exams = $titulo ? Exam::getByTitle($titulo) : Exam::allWithQuestionCount();
 
         Response::json($exams);
     }
@@ -28,15 +25,7 @@ class ExamController
     public static function getQuestionsByExam($examId)
     {
 
-        if (!is_numeric($examId)) {
-            Response::json(
-                [
-                    "error" => "ID de examen invalido"
-                ],
-                404
-            );
-            return;
-        }
+        Validator::validateId($examId);
 
         $getQuestions = Exam::getQuestionsByExam($examId);
 
@@ -52,35 +41,19 @@ class ExamController
     {
         $exams = Exam::allWithQuestionCount();
 
-        if (empty($exams)) {
-            Response::json([
-                "error" => "No se encontro el examen"
-            ], 404);
-            return;
-        }
+        Validator::emptyCollection($exams, "Examenes");
+
         Response::json($exams);
     }
 
     public static function show($examId)
     {
-        if (!is_numeric($examId)) {
-            Response::json([
-                "error" => "ID de examen invalido"
-            ], status: 404);
-            return;
-        }
+        Validator::validateId($examId);
+
         // traemos un examen mediante su id
         $exam = Exam::find((int)$examId);
 
-        if (!$exam) {
-            Response::json(
-                [
-                    "error" => "Examen no encontrado"
-                ],
-                404
-            );
-            return;
-        }
+        Validator::notFound($exam, "Examen");
         //traemos las preguntas por el id del examen
         $questions = Question::getByExam($examId);
 
@@ -100,14 +73,9 @@ class ExamController
     public static function store($data)
     {
         // 1Verificar JWT y obtener el payload
-        $decoded = AuthMiddleware::verify();
-        $userId = $decoded->id ?? null;
+        $userId = AuthMiddleware::getUserId();
 
-        if (!$userId) {
-            Response::json(["error" => "Usuario no válido"], 401);
-            exit;
-        }
-
+        Validator::notFound($userId, "Usuario");
         // Validar datos del examen
         if (
             empty($data["course_id"]) ||
@@ -141,24 +109,12 @@ class ExamController
 
     public static function update($examId, $data)
     {
-        if (!is_numeric($examId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
+
+        Validator::validateId($examId);
 
         $exam = Exam::find($examId);
 
-        if (!$exam) {
-            Response::json([
-                "error" => "Examen no encontrado"
-            ], 404);
-            return;
-        }
+        Validator::notFound($exam, "Examen");
 
         $updated = Exam::update($examId, $data);
 
@@ -176,24 +132,11 @@ class ExamController
 
     public static function destroy($examId)
     {
-        if (!is_numeric($examId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
+        Validator::validateId($examId);
 
         $exam = Exam::find($examId);
 
-        if (!$exam) {
-            Response::json([
-                "error" => "No se pudo encontrar el examen"
-            ], 404);
-            return;
-        }
+        Validator::notFound($exam, "Examen");
 
         Exam::delete($examId);
 
@@ -204,15 +147,7 @@ class ExamController
 
     public static function results($examId)
     {
-        if (!is_numeric($examId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            exit;
-        }
+        Validator::validateId($examId);
 
         $examResult = ExamResult::getByExam($examId);
         Response::json([
@@ -223,13 +158,8 @@ class ExamController
     public static function submit($examId, $data = null)
     {
 
-        $decoded = AuthMiddleware::verify();
-        $userId = $decoded->id ?? null;
+        $userId = AuthMiddleware::getUserId();
 
-        if (!$userId) {
-            Response::json(["error" => "Usuario no válido"], 401);
-            return;
-        }
         $data = json_decode(file_get_contents("php://input"), true);
 
         if (!$data) {
@@ -239,10 +169,11 @@ class ExamController
             return;
         }
 
-        if (!is_numeric($examId)) {
-            Response::json(["error" => "ID invalido"], 400);
-            return;
-        }
+        Validator::validateId($examId);
+
+        $exam = Exam::find($examId);
+
+        Validator::notFound($exam, "Examen");
 
         if (empty($data["answers"]) || !is_array($data["answers"])) {
             Response::json(["error" => "Respuestas invalidas"], 400);
@@ -251,10 +182,7 @@ class ExamController
 
         $exam = Exam::find($examId);
 
-        if (!$exam) {
-            Response::json(["error" => "Examen no encontrado"], 404);
-            return;
-        }
+        Validator::notFound($exam, "Examen");
 
         $result = ExamResult::createFromSubmission(
             $examId,
@@ -270,37 +198,27 @@ class ExamController
 
     public static function take($examId)
     {
-        $decoded = AuthMiddleware::verify();
-        $userId = $decoded->id ?? null;
-    
-        if (!$userId) {
-            Response::json(["error" => "Usuario no válido"], 401);
-            return;
-        }
-    
+
+        Validator::validateId($examId);
+
+        $userId = AuthMiddleware::getUserId();
+
+        Validator::notFound($userId, "Usuario");
+
         $alreadyTaken = ExamResult::existsByUser($examId, $userId);
-    
+
         if ($alreadyTaken) {
             Response::json([
                 "error" => "Ya rendiste este examen"
             ], 403);
             return;
         }
-        if (!is_numeric($examId)) {
-            Response::json([
-                "error" => "ID invalido"
-            ], 400);
-            return;
-        }
+
+        Validator::validateId($examId);
 
         $exam = Exam::findActive($examId);
 
-        if (!$exam) {
-            Response::json([
-                "error" => "Examen no encontrado"
-            ], 404);
-            return;
-        }
+        Validator::notFound($exam, "Examen");
 
         // 🔥 verificar intento activo
         $attempt = ExamAttempt::getActiveAttempt($examId, $userId);
@@ -349,29 +267,13 @@ class ExamController
     }
     public static function getByCourse($courseId)
     {
-        $decoded = AuthMiddleware::verify();
-        $userId = $decoded->id ?? null;
+        $userId = AuthMiddleware::getUserId();
 
-        if (!$userId) {
-            Response::json(["error" => "Usuario no válido"], 401);
-            return;
-        }
-
-        if (!is_numeric($courseId)) {
-            Response::json([
-                "error" => "Id del curso invalido"
-            ], 400);
-            return;
-        }
+        Validator::validateId($courseId);
 
         $courses = Course::find($courseId);
 
-        if (!$courses) {
-            Response::json([
-                "error" => "Curso no encontrado"
-            ], 404);
-            return;
-        }
+        Validator::notFound($courses, "Curso");
 
         $exams = Exam::getExamByCourse($courseId, $userId);
 

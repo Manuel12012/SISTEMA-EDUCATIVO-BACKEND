@@ -1,5 +1,7 @@
 <?php
 
+use App\helpers\Validator;
+
 require_once __DIR__ . '/../models/CourseEnrollment.php';
 require_once __DIR__ . '/../models/Course.php';
 require_once __DIR__ . '/../core/Response.php';
@@ -41,28 +43,15 @@ class EnrollmentController
 
     public static function myCourses($userId)
     {
-        if (!is_numeric($userId)) {
-            Response::json([
-                "error" => "ID invalido"
-            ], 400);
-            return;
-        }
-
-        $courses = CourseEnrollment::getUserCourses((int)$userId);
-
+        Validator::validateId($userId);
+        $courses = CourseEnrollment::getUserCourses($userId);
         Response::json($courses);
     }
 
     public static function getStudentsByCourse($courseId)
     {
-        if (!is_numeric($courseId)) {
-            Response::json([
-                "error" => "ID del curso inválido"
-            ], 400);
-            return;
-        }
-    
-        $students = CourseEnrollment::getStudentsByCourse((int)$courseId);
+        Validator::validateId($courseId);
+        $students = CourseEnrollment::getStudentsByCourse($courseId);
     
         Response::json([
             "message" => "Students retrieved successfully",

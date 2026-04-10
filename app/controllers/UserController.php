@@ -4,6 +4,7 @@ require_once __DIR__ . '/../models/ExamOption.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../models/User.php';
 
+use App\helpers\Validator;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use App\Middleware\AuthMiddleware;
@@ -12,27 +13,10 @@ class UserController
 {
     public static function resultsByUser($userId)
     { // obtener resultados del examen a partir del usuario
-        if (!is_numeric($userId)) {
-            Response::json(
-                [
-                    "error" => "ID no encontrado"
-                ]
-            );
-            return;
-        }
-
+        Validator::validateId($userId);
         $result = ExamResult::getByUser($userId);
 
-        if (!$result) {
-            Response::json(
-                [
-                    "error" => "No se pudo obtener el resultado del examen"
-                ]
-            );
-
-            exit;
-        }
-
+        Validator::notFound($result, "Resultado");
         Response::json($result);
     }
 
@@ -41,46 +25,24 @@ class UserController
         $page = $_GET["page"] ?? 1;
         $limit = $_GET["limit"] ?? 10;
         $rol = $_GET["role"] ?? null;
-    
+
         // 🔥 SI VIENE FILTRO
         if ($rol) {
             $users = User::getByRol($rol, $page, $limit);
         } else {
             $users = User::paginate($page, $limit);
         }
-    
-        if (empty($users)) {
-            Response::json([
-                "error" => "No se encontraron usuarios"
-            ]);
-            exit;
-        }
-    
+
+        Validator::notFound($users, "Usuario");
         Response::json($users);
     }
 
     public static function show($userId)
     {
-        if (!is_numeric($userId)) {
-            Response::json(
-                [
-                    "error" => "Id del usuario no encontrado"
-                ]
-            );
-
-            exit;
-        }
-
+        Validator::validateId($userId);
         $user = User::find($userId);
 
-        if (!$user) {
-            Response::json([
-                "error" => "Usuario no encontrado"
-            ]);
-
-            exit;
-        }
-
+        Validator::notFound($user, "Usuario");
         Response::json($user);
     }
 
@@ -119,26 +81,10 @@ class UserController
     }
     public static function update($userId, $data)
     {
-        if (!is_numeric($userId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            exit;
-        }
-
+        Validator::validateId($userId);
         $user = User::find($userId);
 
-
-        if (!$user) {
-            Response::json([
-                "error" => "Usuario no encontrado"
-            ], 404);
-            exit;
-        }
-
+        Validator::notFound($user, "Usuario");
         $updated = User::update($userId, $data);
 
         if (!$updated) {
@@ -154,24 +100,10 @@ class UserController
 
     public static function destroy($userId)
     {
-        if (!is_numeric($userId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
-
+        Validator::validateId($userId);
         $user = User::find($userId);
 
-        if (!$user) {
-            Response::json([
-                "error" => "No se pudo encontrar el usuario"
-            ], 404);
-            exit;
-        }
+        Validator::notFound($user, "Usuario");
         User::delete($userId);
 
         Response::json([
@@ -191,13 +123,7 @@ class UserController
         // buscamos usuario por email
         $user = User::findByEmail($data["email"]);
 
-        //si usuario no existe mostramos
-        if (!$user) {
-            Response::json([
-                "error" => "Usuario no encontrado"
-            ], 404);
-            exit;
-        }
+        Validator::notFound($user, "Usuario");
 
         //si el password es incorrecto
         if (!password_verify($data["password"], $user["password"])) {

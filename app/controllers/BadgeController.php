@@ -1,4 +1,7 @@
 <?php
+
+use App\helpers\Validator;
+
 require_once __DIR__ . '/../models/Badge.php';
 require_once __DIR__ . '/../core/Response.php';
 class BadgeController
@@ -6,31 +9,16 @@ class BadgeController
     public static function index()
     {
         $badge = Badge::all();
-
-        if (empty($badge)) {
-            Response::json([
-                "error" => "No se encontro el badge"
-            ], 200);
-        }
+        Validator::emptyCollection($badge, "Badges");
         Response::json($badge);
     }
 
     public static function show($badgeId)
     {
-        if (!is_numeric($badgeId)) {
-            Response::json([
-                "error" => "Id del badge invalido"
-            ], 400);
-        }
-
+        Validator::validateId($badgeId);
         $badge = Badge::find($badgeId);
 
-        if (!$badge) {
-            Response::json([
-                "error" => "Badge no encontrada"
-            ], 404);
-        }
-
+        Validator::notFound($badge, "Badge");
         Response::json($badge);
     }
 
@@ -53,11 +41,7 @@ class BadgeController
         $badge = Badge::create($data);
 
         // si question no existe entonces decimos que no se pudo crear la pregunta
-        if (!$badge) {
-            Response::json([
-                "error" => "No se pudo crear el badge"
-            ], 500);
-        }
+        Validator::notFound($badge, "Badge");
 
         // si pasa validacion retornamos un json exitoso 
         Response::json([

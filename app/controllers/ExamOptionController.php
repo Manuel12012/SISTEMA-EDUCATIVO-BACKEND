@@ -1,4 +1,7 @@
 <?php
+
+use App\helpers\Validator;
+
 require_once __DIR__ . '/../models/ExamOption.php';
 require_once __DIR__ . '/../core/Response.php';
 
@@ -7,33 +10,16 @@ class ExamOptionController
     public static function index()
     {
         $examOption = ExamOption::all();
-
-        if (empty($examOption)) {
-            Response::json([
-                "error" => "No se encontro la opcion de la pregunta"
-            ], 404);
-            return;
-        }
+        Validator::emptyCollection($examOption, "Opciones");
         Response::json($examOption);
     }
 
     public static function show($examOptionId)
     {
-        if (!is_numeric($examOptionId)) {
-            Response::json([
-                "error" => "Id de la opcion del examen invalido"
-            ], 400);
-            return;
-        }
-
+        Validator::validateId($examOptionId);
         $examOption = ExamOption::find($examOptionId);
 
-        if (!$examOption) {
-            Response::json([
-                "error" => "Opcion de examen no encontrada"
-            ], 404);
-            return;
-        }
+        Validator::notFound($examOption, "Opcion");
         Response::json([
             "examOption" => $examOption
         ]);
@@ -43,7 +29,7 @@ class ExamOptionController
     {
         if (
             !isset($data["question_id"]) ||
-            empty($data["opcion"]) 
+            empty($data["opcion"])
         ) {
             Response::json([
                 "error" => "Datos incompletos"
@@ -68,25 +54,10 @@ class ExamOptionController
 
     public static function update($examOptionId, $data)
     {
-        if (!is_numeric($examOptionId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
-
+        Validator::validateId($examOptionId);
         $examOption = ExamOption::find($examOptionId);
 
-        if (!$examOption) {
-            Response::json([
-                "error" => "Opcion no encontrada"
-            ], 404);
-            return;
-        }
-
+        Validator::notFound($examOption, "Opcion");
         $updated = ExamOption::update($examOptionId, $data);
 
         if (!$updated) {
@@ -103,25 +74,10 @@ class ExamOptionController
 
     public static function destroy($examOptionId)
     {
-        if (!is_numeric($examOptionId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
-
+        Validator::validateId($examOptionId);
         $examOption = ExamOption::find($examOptionId);
 
-        if (!$examOption) {
-            Response::json([
-                "error" => "No se pudo encontrar la opcion"
-            ], 404);
-            return;
-        }
-
+        Validator::notFound($examOption, "Opcion");
         ExamOption::delete($examOptionId);
 
         Response::json([
@@ -131,13 +87,7 @@ class ExamOptionController
 
     public static function getByQuestion($questionId)
     {
-        if (!is_numeric($questionId)) {
-            Response::json([
-                "error" => "ID de pregunta invalido"
-            ], 400);
-            return;
-        }
-
+        Validator::validateId($questionId);
         $options = ExamOption::getByQuestion((int)$questionId);
         if (empty($options)) {
             Response::json([]);

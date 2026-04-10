@@ -1,4 +1,7 @@
 <?php
+
+use App\helpers\Validator;
+
 require_once __DIR__ . '/../models/Question.php';
 require_once __DIR__ . '/../models/ExamOption.php';
 require_once __DIR__ . '/../core/Response.php';
@@ -9,52 +12,26 @@ class QuestionController
     {
         $options = Question::allWithOptionsCount();
 
-        if (empty($options)) {
-            Response::json([
-                "error" => "No se encontro el examen"
-            ], 404);
-            return;
-        }
+        Validator::emptyCollection($options, "Opciones");
         Response::json($options);
     }
 
     public static function getOptionsByQuestions($questionId)
     {
-        if (!is_numeric($questionId)) {
-            Response::json([
-                "error" => "Id de la pregunta invalido"
-            ], 400);
-            return;
-        }
-
+        Validator::validateId($questionId);
         $OptionsByQuestion = Question::getOptionsByQuestions($questionId);
 
-        if (!$OptionsByQuestion) {
-            Response::json([
-                "error" => "Opcion no encontrada"
-            ], 404);
-        }
-
+        Validator::notFound($OptionsByQuestion, "Opcion");
         Response::json($OptionsByQuestion);
     }
 
     public static function show($questionId)
     {
-        if (!is_numeric($questionId)) {
-            Response::json([
-                "error" => "Id de la pregunta invalido"
-            ], 400);
-            return;
-        }
+        Validator::validateId($questionId);
 
         $question = Question::find($questionId);
 
-        if (!$question) {
-            Response::json([
-                "error" => "Pregunta no encontrada"
-            ], 404);
-            return;
-        }
+        Validator::notFound($question, "Pregunta");
 
         $examOptions = ExamOption::getByQuestion($questionId);
 
@@ -100,25 +77,12 @@ class QuestionController
 
     public static function update($questionId, $data)
     {
-        if (!is_numeric($questionId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
+        Validator::validateId($questionId);
 
         // mandamos a llamar al metodo find para actualizarlo en breve
         $question = Question::find($questionId);
 
-        if (!$question) {
-            Response::json([
-                "error" => "Pregunta no encontrada"
-            ], 404);
-            return;
-        }
+        Validator::notFound($question, "Pregunta");
 
         // mandamos a llamar el metodo uptaded para ahora si actualizarlo
         $updated = Question::update($questionId, $data);
@@ -139,25 +103,12 @@ class QuestionController
 
     public static function destroy($questionId)
     {
-        if (!is_numeric($questionId)) {
-            Response::json(
-                [
-                    "error" => "ID invalido"
-                ],
-                400
-            );
-            return;
-        }
+        Validator::validateId($questionId);
         // mandamos a traer la funcion para buscar la pregunta que borraremos
         $question = Question::find($questionId);
 
         // si question no existe entonces no se pudo encontrar la pagina
-        if (!$question) {
-            Response::json([
-                "error" => "No se pudo encontrar la pregunta"
-            ], 404);
-            return;
-        }
+        Validator::notFound($question, "Pregunta");
 
         // mandamos a llamar la funcion delete pero esta vez no lo almacenamos en una variable
         $deleted = Question::delete($questionId);
